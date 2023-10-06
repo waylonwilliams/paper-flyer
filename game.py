@@ -70,9 +70,11 @@ class Player(pygame.sprite.Sprite):
                 self.player_moving = 0
                 self.player_collide_rect.update((self.player_collide_rect.left, self.player_collide_rect.top - 5, self.player_collide_rect.width + 15, self.player_collide_rect.height + 10))
                 self.image = Player.player_surfaces[self.player_animation]
-                
+        pygame.draw.rect(screen, "yellow", self.rect)
+        pygame.draw.rect(screen, "red", self.player_collide_rect)
         # put player to screen
         screen.blit(self.image, self.rect)
+
 
 
     def animate_player(self):
@@ -176,19 +178,23 @@ class Enemy(pygame.sprite.Sprite):
 
     def update(self):
 
+
         self.rect.left -= Enemy.speed
+
+        pygame.draw.rect(screen, "yellow", self.rect)
 
         screen.blit(self.image, self.rect)
 
         if self.rect.left < -200:
 
             enemy_group.remove(self)
+        
+        
             
     
 
 
     def animate(self):
-        print("animating enemy")
 
         if self.animation == 0:
             self.image = self.type[self.animation]
@@ -489,8 +495,10 @@ while True:
 
         
         # checks if player hit an enemy and if so ends the game
-        if pygame.sprite.spritecollide(player_object, enemy_group, False):
-            game = False
+        for i in enemy_group:
+            if i.rect.colliderect(player_object.player_collide_rect):
+                game = False
+                break
 
 
     ############## START / RESTART SCREENS #####################
