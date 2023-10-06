@@ -3,7 +3,7 @@
 # intro animation
 # high scoresf
 # clean background and enemy design transition will be tough, i can do that functionality while waiting for new designs
-#   i think sprites might be necessary, changing the background smoothly idk what im gonna do tbh
+# background class
 # if __name__ == "__main__":
 #   everything that i currently have outside of a fxn
 
@@ -204,6 +204,39 @@ class Enemy(pygame.sprite.Sprite):
             self.animation = 0
 
 
+class Background(pygame.sprite.Sprite):
+    bird_background = pygame.image.load("graphics/Planner-3.jpg").convert()
+    plane_background = pygame.image.load("graphics/plane_background.jpg").convert()
+    rocket_background = pygame.image.load("graphics/rocket_background.jpg").convert()
+    alien_background = pygame.image.load("graphics/alien_backgrond.png").convert()
+
+    def __init__(self):
+        super().__init__()
+        self.image = Background.bird_background
+        self.rect = self.image.get_rect(topleft = (0, 0))
+
+    def stage_update(self, stage):
+        if stage == 0:
+            self.image = Background.plane_background
+        elif stage == 1:
+            self.image = Background.rocket_background
+        elif stage == 2:
+            self.image = Background.alien_background
+
+    def reset(self):
+        self.image = Background.bird_background
+        self.rect.left = 0
+
+    def update(self):
+
+        screen.blit(self.image, self.rect)
+        self.rect.left -= 2
+        if self.rect.left <= -1000:
+            self.rect.left = 0
+
+
+
+
 # restart function would be nice too
 
 
@@ -234,6 +267,9 @@ def update_score():
 # creates the player object
 player_object = Player()
 
+# creates background object 
+background_object = Background()
+
 # creates the clock object
 clock = pygame.time.Clock()
 
@@ -246,14 +282,6 @@ intro = True # whether the game should reroute to the start screen or not
 start_time = 0 # initializing variable used to calculate how long the game has been running -> score
 speed = 8 # initial speed of enemies, increases as game goes on
 # i should put speed in enemy class
-
-# background surfaces and rect
-bird_background = pygame.image.load("graphics/Planner-3.jpg").convert()
-plane_background = pygame.image.load("graphics/plane_background.jpg").convert()
-rocket_background = pygame.image.load("graphics/rocket_background.jpg").convert()
-alien_background = pygame.image.load("graphics/alien_backgrond.png").convert()
-background = bird_background
-background_rect = background.get_rect(topleft = (0, 0))
 
 # start screen surfaces and rects
 man_surface = pygame.image.load("graphics/man.jpeg").convert_alpha()
@@ -364,19 +392,13 @@ while True:
 
             if event.type == stage_timer:
 
-                background_rect.left = 0
+                background_object.rect.left = 0
                 Enemy.stage_update(stage)
 
+                background_object.stage_update(stage)
 
-                if stage == 0:
-                    stage += 1
-                    background = plane_background
-                elif stage == 1:
-                    stage += 1
-                    background = rocket_background
-                elif stage == 2:
-                    stage += 1
-                    background = alien_background
+
+                stage += 1
                     # current_enemy_type = next and so on
 
 
@@ -386,8 +408,6 @@ while True:
                 #    pygame.time.set_timer(enemy_timer, spawn_speed)
                 #    enemy_surface = current_enemy_type[enemy_animation]
                 # i should change background and character surfaces here
-                speed += 1.5
-
 
 
         # checked when not in game mode, start / restart screens
@@ -410,8 +430,7 @@ while True:
                         pygame.time.set_timer(stage_timer, 20000)
                         Enemy.current_type = Enemy.bird_surfaces
                         stage = 0
-                        background = bird_background
-                        background_rect.left = 0
+                        background_object.reset()
 
 
                         # character position updates, could modularize
@@ -447,8 +466,7 @@ while True:
                         pygame.time.set_timer(stage_timer, 20000)
                         Enemy.current_type = Enemy.bird_surfaces
                         stage = 0
-                        background = bird_background
-                        background_rect.left = 0
+                        background_object.reset()
 
 
                         # reset positions, can modularize, i guess i won't even need to reset in the future though, clear enemies list ig
@@ -468,10 +486,7 @@ while True:
 
 
         # background
-        screen.blit(background, background_rect)
-        background_rect.left -= 2
-        if background_rect.left <= -1000:
-            background_rect.left = 0
+        background_object.update()
         # i should change the background surface when stage changes
 
 
