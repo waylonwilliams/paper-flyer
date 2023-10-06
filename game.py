@@ -3,11 +3,8 @@
 # intro animation
 # high scoresf
 # clean background and enemy design transition will be tough, i can do that functionality while waiting for new designs
-# background class
 # if __name__ == "__main__":
 #   everything that i currently have outside of a fxn
-
-############### DEFINITIONS AND IMPORTS ############################
 
 
 import pygame
@@ -18,12 +15,12 @@ from random import randint
 pygame.init()
 
 # creates the base display
-screen = pygame.display.set_mode((1000, 600)) # 1000x600 window
-screen_rect = screen.get_rect(topleft = (0, 0)) # gets a rect for the surface, used cover screen on start screen or game over screen
-pygame.display.set_caption("") # removes the title on the window
+screen = pygame.display.set_mode((1000, 600))
+screen_rect = screen.get_rect(topleft = (0, 0))
+pygame.display.set_caption("")
+
 
 class Player(pygame.sprite.Sprite):
-
     # straight player images
     player_straight_1 = pygame.image.load("graphics/p1.png").convert_alpha()
     player_straight_2 = pygame.image.load("graphics/p2.png").convert_alpha()
@@ -39,7 +36,6 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
 
         self.player_moving = 0 # 0 not moving, 1 up, 2 down
-        # maybe animation can be a universal value and i can animate everything in the same event
         self.player_animation = 0 # 0 or 1
 
         # initializes actual player
@@ -48,9 +44,7 @@ class Player(pygame.sprite.Sprite):
         self.player_collide_rect = self.rect.copy()
         self.player_collide_rect.update(self.rect.left, self.rect.top + 10, self.rect.width - 30, self.rect.height - 20) # i use this rect for checking if player has collided, otherwise the player box is too large
 
-
     def move_player(self):
-
         # just puts player to screen if its not moving
         if self.player_moving != 0:
 
@@ -70,15 +64,11 @@ class Player(pygame.sprite.Sprite):
                 self.player_moving = 0
                 self.player_collide_rect.update((self.player_collide_rect.left, self.player_collide_rect.top - 5, self.player_collide_rect.width + 15, self.player_collide_rect.height + 10))
                 self.image = Player.player_surfaces[self.player_animation]
-        pygame.draw.rect(screen, "yellow", self.rect)
-        pygame.draw.rect(screen, "red", self.player_collide_rect)
+
         # put player to screen
         screen.blit(self.image, self.rect)
 
-
-
     def animate_player(self):
-
         # switches between animation, timing is done by event loop
         if self.player_animation == 0:
             self.image = Player.player_surfaces[self.player_animation]
@@ -87,9 +77,7 @@ class Player(pygame.sprite.Sprite):
             self.image = Player.player_surfaces[self.player_animation]
             self.player_animation = 0
 
-
     def reset(self):
-
         # resets all player values when start or restart button is pressed
         self.rect.midleft = (10, 300)
         self.player_collide_rect.midleft = (10, 300)
@@ -100,40 +88,36 @@ class Player(pygame.sprite.Sprite):
 
 
 class Enemy(pygame.sprite.Sprite):
-    # enemy surfaces and rects
     # birds
     bird_1 = pygame.image.load("graphics/bird2.PNG").convert_alpha()
     bird_2 = pygame.image.load("graphics/bird1.PNG").convert_alpha()
     bird_surfaces = [bird_1, bird_2]
 
-    #plane
+    #planes
 
     # rockets
     rocket_1 = pygame.image.load("graphics/rocket1.PNG").convert_alpha()
     rocket_2 = pygame.image.load("graphics/rocket2.PNG").convert_alpha()
     rocket_surfaces = [rocket_1, rocket_2]
-    enemy_animation = 0
 
     # aliens
     alien_1 = pygame.image.load("graphics/ufo1.PNG").convert_alpha()
     alien_2 = pygame.image.load("graphics/ufo2.PNG").convert_alpha()
     alien_surfaces = [alien_1, alien_2]
 
-
+    enemy_animation = 0
     spawn_speed = 1400
+    speed = 8
     possible_rows = [0, 1]
     prev_row = 2
     current_type = bird_surfaces
-    speed = 8
-
-
 
     def __init__(self):
         super().__init__()
-
-        self.animation = 0 # should be a single animation variable with the player
+        
+        self.animation = 0
         self.type = Enemy.bird_surfaces
-        self.image = Enemy.current_type[Enemy.enemy_animation]
+        self.image = Enemy.current_type[self.animation]
         self.rect = self.image.get_rect(midleft = (1200, 100))
 
         # different surfaces and enemy configs
@@ -149,50 +133,32 @@ class Enemy(pygame.sprite.Sprite):
 
         new_enemy = Enemy()
         new_enemy.type = Enemy.current_type
-        new_enemy.image = new_enemy.type[new_enemy.animation]
+        new_enemy.image = new_enemy.type[0]
         rand = randint(0, 1)
         new_enemy.rect.midleft = ((1100 + (Enemy.possible_rows[rand] * 200 + 100)), (Enemy.possible_rows[rand] * 200 + 100))
         enemy_group.add(new_enemy)
         Enemy.possible_rows.append(Enemy.prev_row)
         Enemy.prev_row = Enemy.possible_rows.pop(rand)
 
-
     def stage_update(stage):
 
         if stage == 0:
-             
             Enemy.current_type = Enemy.rocket_surfaces
-
-        elif stage == 1:
-             
+        elif stage == 1:        
             Enemy.current_type = Enemy.alien_surfaces
-# add more types
-
+        # add more types
 
         if Enemy.spawn_speed > 400:
             Enemy.spawn_speed -= 200
             pygame.time.set_timer(enemy_timer, Enemy.spawn_speed)
         Enemy.speed += 1.5
-            
-# make sure to update stage outside of this fxn
 
     def update(self):
 
-
         self.rect.left -= Enemy.speed
-
-        pygame.draw.rect(screen, "yellow", self.rect)
-
         screen.blit(self.image, self.rect)
-
         if self.rect.left < -200:
-
             enemy_group.remove(self)
-        
-        
-            
-    
-
 
     def animate(self):
 
@@ -235,8 +201,6 @@ class Background(pygame.sprite.Sprite):
             self.rect.left = 0
 
 
-
-
 # restart function would be nice too
 
 
@@ -263,14 +227,9 @@ def update_score():
 ############################ PYGAME SETUP #############################
 
 
-
-# creates the player object
 player_object = Player()
-
-# creates background object 
 background_object = Background()
-
-# creates the clock object
+enemy_group = pygame.sprite.Group()
 clock = pygame.time.Clock()
 
 # importing font
@@ -281,7 +240,6 @@ game = False # whether game is running or not
 intro = True # whether the game should reroute to the start screen or not
 start_time = 0 # initializing variable used to calculate how long the game has been running -> score
 speed = 8 # initial speed of enemies, increases as game goes on
-# i should put speed in enemy class
 
 # start screen surfaces and rects
 man_surface = pygame.image.load("graphics/man.jpeg").convert_alpha()
@@ -295,30 +253,16 @@ restart_rect = restart_surface.get_rect(midtop = (500, 350))
 home_surface = test_font.render("Start Screen", False, "black")
 home_rect = home_surface.get_rect(midtop = (500, 450))
 
-
-enemy_animation_timer = pygame.USEREVENT + 1
-pygame.time.set_timer(enemy_animation_timer, 400)
-
-# initialize enemy group, empty until one spawns
-enemy_group = pygame.sprite.Group()
-
-# some things used to add new enemies to the game
-
-# i should call fxn on this ( enemy_rects = move_enemies ) and the fxn will return a new list of enemies and also create new blits on screen
-enemy_timer = pygame.USEREVENT + 2 # creating a custom pygame event
+# enemy spawn event
+enemy_timer = pygame.USEREVENT + 1 # creating a custom pygame event
 pygame.time.set_timer(enemy_timer, Enemy.spawn_speed) # creating a timer that ticks every 1.6 seconds, triggers new enemy creation
-# pygame.time.set_timer(enemy_timer, 100)
-# I CAN CHANGE THE TIMER SPEED IN RUNTIME to have different elevations, after score of x increase timer speed and enemy speed and enemy images and background images
 
+# animation event
+animation_timer = pygame.USEREVENT + 2 # not sure if + 2 or + 1
+pygame.time.set_timer(animation_timer, 400)
 
-# player events
-player_timer = pygame.USEREVENT + 3 # not sure if + 2 or + 1
-pygame.time.set_timer(player_timer, 400)
-
-
-# timer to update background and enemy time and enemy speed and spawn rate every 12 seconds
-stage_timer = pygame.USEREVENT + 4
-# stage timer is not working properly, it clicks every x and it seems like you can't reset as i previously thought?
+# stage change timer
+stage_timer = pygame.USEREVENT + 3
 stage = 0
 
 
@@ -326,9 +270,6 @@ stage = 0
 
 
 while True:
-
-
-    ######### EVENT LOOP ################
 
 
     for event in pygame.event.get(): # loop through all pygame events
@@ -350,64 +291,29 @@ while True:
                             player_object.player_moving = 1 # player moving state is now up
                             player_object.player_collide_rect.update(player_object.player_collide_rect.left, player_object.player_collide_rect.top + 5, player_object.player_collide_rect.width - 15, player_object.player_collide_rect.height - 10)
 
-                
                 if event.key == pygame.K_DOWN: # down arrow key
                     if player_object.rect.centery !=  500: # can't move down if at the bottom
                         if player_object.player_moving == 0: # not currently moving
                             player_object.player_moving = 2 # player moving state is now down
                             player_object.player_collide_rect.update(player_object.player_collide_rect.left, player_object.player_collide_rect.top + 5, player_object.player_collide_rect.width - 15, player_object.player_collide_rect.height - 10)
 
-
-
             if event.type == enemy_timer: # spawns new enemy
-                # would be nice if the enemies didn't spawn in the same row 2x in a row
 
-
-                # spawns an enemy, its movement is controlled in move_enemies(), add the returned enemy to the list of current enemies
-                # THIS IS NOT EFFICIENT, even though there are only 3 options it would still be worth fixing
                 Enemy.rand = randint(0, 1)
                 Enemy.create()
-                # rand = choice( 2 len list )
-                # queue enemy in that row
-                # list + prev
-                # prev = rand
-                # o(1) check chekc hchekc
-                # it will be a certain kind of enemy for each stage
-                # the surface i pass here maybe doesn't matter since it is off the screen
-            
 
-
-            # consolidate animation timers?
-            # just one animation variable
-            if event.type == player_timer: # every 400 ms
+            if event.type == animation_timer: # every 400 ms
 
                 player_object.animate_player()
-
-
-            if event.type == enemy_animation_timer:
-                
                 for spr in enemy_group:
                     spr.animate()
-
 
             if event.type == stage_timer:
 
                 background_object.rect.left = 0
                 Enemy.stage_update(stage)
-
                 background_object.stage_update(stage)
-
-
                 stage += 1
-                    # current_enemy_type = next and so on
-
-
-                # however after more code is implemented the scales could be slightly swayed and i should check back
-                #if spawn_speed > 400:
-                #    spawn_speed -= 200 # increases enemy spawns
-                #    pygame.time.set_timer(enemy_timer, spawn_speed)
-                #    enemy_surface = current_enemy_type[enemy_animation]
-                # i should change background and character surfaces here
 
 
         # checked when not in game mode, start / restart screens
@@ -496,13 +402,6 @@ while True:
 
         # updates player location
         player_object.move_player()
-
-
-
-
-
-        ########## CLASS TESTING ############ 
-
 
         # moves enemies and saves their new rects for the next iteration
         enemy_group.update()
