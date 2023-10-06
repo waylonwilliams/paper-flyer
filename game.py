@@ -4,7 +4,8 @@
 # high scoresf
 # clean background and enemy design transition will be tough, i can do that functionality while waiting for new designs
 #   i think sprites might be necessary, changing the background smoothly idk what im gonna do tbh
-
+# if __name__ == "__main__":
+#   everything that i currently have outside of a fxn
 
 ############### DEFINITIONS AND IMPORTS ############################
 
@@ -13,28 +14,36 @@ import pygame
 from sys import exit
 from random import randint
 
+# initializing pygame stuff
+pygame.init()
+
+# creates the base display
+screen = pygame.display.set_mode((1000, 600)) # 1000x600 window
+screen_rect = screen.get_rect(topleft = (0, 0)) # gets a rect for the surface, used cover screen on start screen or game over screen
+pygame.display.set_caption("") # removes the title on the window
 
 class Player(pygame.sprite.Sprite):
+
+    # straight player images
+    player_straight_1 = pygame.image.load("graphics/p1.png").convert_alpha()
+    player_straight_2 = pygame.image.load("graphics/p2.png").convert_alpha()
+
+    # player moving images
+    player_up = pygame.image.load("graphics/plane1up.PNG").convert_alpha()
+    player_down = pygame.image.load("graphics/plane2down.PNG").convert_alpha()
+
+    # all player images, 0 and 1 are animated straight, 2 is up, 3 is down
+    player_surfaces = [player_straight_1, player_straight_2, player_up, player_down]
+
     def __init__(self):
         super().__init__()
-
-        # straight player images
-        player_straight_1 = pygame.image.load("graphics/p1.png").convert_alpha()
-        player_straight_2 = pygame.image.load("graphics/p2.png").convert_alpha()
-
-        # player moving images
-        player_up = pygame.image.load("graphics/plane1up.PNG").convert_alpha()
-        player_down = pygame.image.load("graphics/plane2down.PNG").convert_alpha()
-
-        # all player images, 0 and 1 are animated straight, 2 is up, 3 is down
-        self.player_surfaces = [player_straight_1, player_straight_2, player_up, player_down]
 
         self.player_moving = 0 # 0 not moving, 1 up, 2 down
         # maybe animation can be a universal value and i can animate everything in the same event
         self.player_animation = 0 # 0 or 1
 
         # initializes actual player
-        self.image = self.player_surfaces[self.player_animation] # image is the current surface of the sprite
+        self.image = Player.player_surfaces[self.player_animation] # image is the current surface of the sprite
         self.rect = self.image.get_rect(midleft = (10, 300)) # rect is the rect which image will be displayed on
         self.player_collide_rect = self.rect.copy()
         self.player_collide_rect.update(self.rect.left, self.rect.top + 10, self.rect.width - 30, self.rect.height - 20) # i use this rect for checking if player has collided, otherwise the player box is too large
@@ -49,18 +58,18 @@ class Player(pygame.sprite.Sprite):
             if self.player_moving == 1:
                 self.rect.y -= 5
                 self.player_collide_rect.y -= 5
-                self.image = self.player_surfaces[2]
+                self.image = Player.player_surfaces[2]
             # if down
             elif self.player_moving == 2:
                 self.rect.y += 5
                 self.player_collide_rect.y += 5
-                self.image = self.player_surfaces[3]
+                self.image = Player.player_surfaces[3]
             
             # if it reaches one of the 3 rows
             if self.rect.centery == 100 or self.rect.centery == 300 or self.rect.centery == 500:
                 self.player_moving = 0
                 self.player_collide_rect.update((self.player_collide_rect.left, self.player_collide_rect.top - 5, self.player_collide_rect.width + 15, self.player_collide_rect.height + 10))
-                self.image = self.player_surfaces[self.player_animation]
+                self.image = Player.player_surfaces[self.player_animation]
                 
         # put player to screen
         screen.blit(self.image, self.rect)
@@ -70,10 +79,10 @@ class Player(pygame.sprite.Sprite):
 
         # switches between animation, timing is done by event loop
         if self.player_animation == 0:
-            self.image = self.player_surfaces[self.player_animation]
+            self.image = Player.player_surfaces[self.player_animation]
             self.player_animation = 1
         else:
-            self.image = self.player_surfaces[self.player_animation]
+            self.image = Player.player_surfaces[self.player_animation]
             self.player_animation = 0
 
 
@@ -82,15 +91,48 @@ class Player(pygame.sprite.Sprite):
         # resets all player values when start or restart button is pressed
         self.rect.midleft = (10, 300)
         self.player_collide_rect.midleft = (10, 300)
-        self.image = self.player_surfaces[self.player_animation]
+        self.image = Player.player_surfaces[self.player_animation]
         if self.player_moving != 0:
             self.player_moving = 0
             self.player_collide_rect.update(self.player_collide_rect.left, self.player_collide_rect.top - 5, self.player_collide_rect.width + 15, self.player_collide_rect.height + 10)
 
 
 class Enemy(pygame.sprite.Sprite):
+    # enemy surfaces and rects
+    # birds
+    bird_1 = pygame.image.load("graphics/bird2.PNG").convert_alpha()
+    bird_2 = pygame.image.load("graphics/bird1.PNG").convert_alpha()
+    bird_surfaces = [bird_1, bird_2]
+
+    #plane
+
+    # rockets
+    rocket_1 = pygame.image.load("graphics/rocket1.PNG").convert_alpha()
+    rocket_2 = pygame.image.load("graphics/rocket2.PNG").convert_alpha()
+    rocket_surfaces = [rocket_1, rocket_2]
+    enemy_animation = 0
+
+    # aliens
+    alien_1 = pygame.image.load("graphics/ufo1.PNG").convert_alpha()
+    alien_2 = pygame.image.load("graphics/ufo2.PNG").convert_alpha()
+    alien_surfaces = [alien_1, alien_2]
+
+
+    spawn_speed = 1400
+    possible_rows = [0, 1]
+    prev_row = 2
+    current_type = bird_surfaces
+    speed = 8
+
+
+
     def __init__(self):
         super().__init__()
+
+        self.animation = 0 # should be a single animation variable with the player
+        self.type = Enemy.bird_surfaces
+        self.image = Enemy.current_type[Enemy.enemy_animation]
+        self.rect = self.image.get_rect(midleft = (1200, 100))
 
         # different surfaces and enemy configs
         # method to move enemies, should be treated as a method for self and by running that on the group it will apply to all
@@ -100,6 +142,60 @@ class Enemy(pygame.sprite.Sprite):
         # i can have a global variable for the list of surfaces i want to use when producing new enemies and ill change that at the stage event
         # collide checker, checks if self collides with input
         # reset
+
+    def create():
+
+        new_enemy = Enemy()
+        new_enemy.type = Enemy.current_type
+        new_enemy.image = new_enemy.type[new_enemy.animation]
+        rand = randint(0, 1)
+        new_enemy.rect.midleft = ((1100 + (Enemy.possible_rows[rand] * 200 + 100)), (Enemy.possible_rows[rand] * 200 + 100))
+        enemy_group.add(new_enemy)
+        Enemy.possible_rows.append(Enemy.prev_row)
+        Enemy.prev_row = Enemy.possible_rows.pop(rand)
+
+
+    def stage_update(stage):
+
+        if stage == 0:
+             
+            Enemy.current_type = Enemy.rocket_surfaces
+
+        elif stage == 1:
+             
+            Enemy.current_type = Enemy.alien_surfaces
+# add more types
+
+
+        if Enemy.spawn_speed > 400:
+            Enemy.spawn_speed -= 200
+            pygame.time.set_timer(enemy_timer, Enemy.spawn_speed)
+        Enemy.speed += 1.5
+            
+# make sure to update stage outside of this fxn
+
+    def update(self):
+
+        self.rect.left -= Enemy.speed
+
+        screen.blit(self.image, self.rect)
+
+        if self.rect.left < -200:
+
+            enemy_group.remove(self)
+            
+    
+
+
+    def animate(self):
+        print("animating enemy")
+
+        if self.animation == 0:
+            self.image = self.type[self.animation]
+            self.animation = 1
+        elif self.animation == 1:
+            self.image = self.type[self.animation]
+            self.animation = 0
 
 
 # restart function would be nice too
@@ -125,34 +221,9 @@ def update_score():
     return score_ms
 
 
-def move_enemies(enemy_rects):
-    """
-    function that moves the enemies currently on the screen to the left
-    """
-    if enemy_rects:
-        for i in range(len(enemy_rects) - 1, -1, -1):
-            enemy_rects[i].left -= speed
-            
-
-            screen.blit(enemy_surface, enemy_rects[i])
-
-
-            if enemy_rects[i].left < -200:
-                enemy_rects.pop(i)
-            
-    return enemy_rects
-
-
 ############################ PYGAME SETUP #############################
 
 
-# initializing pygame stuff
-pygame.init()
-
-# creates the base display
-screen = pygame.display.set_mode((1000, 600)) # 1000x600 window
-screen_rect = screen.get_rect(topleft = (0, 0)) # gets a rect for the surface, used cover screen on start screen or game over screen
-pygame.display.set_caption("") # removes the title on the window
 
 # creates the player object
 player_object = Player()
@@ -190,43 +261,18 @@ restart_rect = restart_surface.get_rect(midtop = (500, 350))
 home_surface = test_font.render("Start Screen", False, "black")
 home_rect = home_surface.get_rect(midtop = (500, 450))
 
-# enemy surfaces and rects
-# birds
-bird_1 = pygame.image.load("graphics/bird2.PNG").convert_alpha()
-bird_2 = pygame.image.load("graphics/bird1.PNG").convert_alpha()
-bird_surfaces = [bird_1, bird_2]
 
-#plane
-
-# rockets
-rocket_1 = pygame.image.load("graphics/rocket1.PNG").convert_alpha()
-rocket_2 = pygame.image.load("graphics/rocket2.PNG").convert_alpha()
-rocket_surfaces = [rocket_1, rocket_2]
-enemy_animation = 0
-
-# aliens
-alien_1 = pygame.image.load("graphics/ufo1.PNG").convert_alpha()
-alien_2 = pygame.image.load("graphics/ufo2.PNG").convert_alpha()
-alien_surfaces = [alien_1, alien_2]
-
-# other enemy config
-enemy_animation = 0 # should be a single animation variable with the player
-current_enemy_type = bird_surfaces
-enemy_surface = current_enemy_type[enemy_animation]
-enemy_rect = enemy_surface.get_rect(midleft = (1200, 100))
 enemy_animation_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(enemy_animation_timer, 400)
 
+# initialize enemy group, empty until one spawns
+enemy_group = pygame.sprite.Group()
 
 # some things used to add new enemies to the game
-enemy_rects = [] # holds all enemy objects while they are travelling across the screen
-spawn_speed = 1400
-possible_rows = [0, 1]
-prev_row = 2
-rand = -1
+
 # i should call fxn on this ( enemy_rects = move_enemies ) and the fxn will return a new list of enemies and also create new blits on screen
 enemy_timer = pygame.USEREVENT + 2 # creating a custom pygame event
-pygame.time.set_timer(enemy_timer, spawn_speed) # creating a timer that ticks every 1.6 seconds, triggers new enemy creation
+pygame.time.set_timer(enemy_timer, Enemy.spawn_speed) # creating a timer that ticks every 1.6 seconds, triggers new enemy creation
 # pygame.time.set_timer(enemy_timer, 100)
 # I CAN CHANGE THE TIMER SPEED IN RUNTIME to have different elevations, after score of x increase timer speed and enemy speed and enemy images and background images
 
@@ -285,10 +331,8 @@ while True:
 
                 # spawns an enemy, its movement is controlled in move_enemies(), add the returned enemy to the list of current enemies
                 # THIS IS NOT EFFICIENT, even though there are only 3 options it would still be worth fixing
-                rand = randint(0, 1)
-                enemy_rects.append(enemy_surface.get_rect(midleft = (1100 + (possible_rows[rand] * 200 + 100), (possible_rows[rand] * 200 + 100))))
-                possible_rows.append(prev_row)
-                prev_row = possible_rows.pop(rand)
+                Enemy.rand = randint(0, 1)
+                Enemy.create()
                 # rand = choice( 2 len list )
                 # queue enemy in that row
                 # list + prev
@@ -308,26 +352,21 @@ while True:
 
             if event.type == enemy_animation_timer:
                 
-                if enemy_animation == 0:
-                    enemy_surface = current_enemy_type[enemy_animation]
-                    enemy_animation = 1
-                else:
-                    enemy_surface = current_enemy_type[enemy_animation]
-                    enemy_animation = 0
+                for spr in enemy_group:
+                    spr.animate()
 
 
             if event.type == stage_timer:
 
                 background_rect.left = 0
+                Enemy.stage_update(stage)
 
 
                 if stage == 0:
                     stage += 1
-                    current_enemy_type = rocket_surfaces
                     background = plane_background
                 elif stage == 1:
                     stage += 1
-                    current_enemy_type = alien_surfaces
                     background = rocket_background
                 elif stage == 2:
                     stage += 1
@@ -336,10 +375,10 @@ while True:
 
 
                 # however after more code is implemented the scales could be slightly swayed and i should check back
-                if spawn_speed > 400:
-                    spawn_speed -= 200 # increases enemy spawns
-                    pygame.time.set_timer(enemy_timer, spawn_speed)
-                    enemy_surface = current_enemy_type[enemy_animation]
+                #if spawn_speed > 400:
+                #    spawn_speed -= 200 # increases enemy spawns
+                #    pygame.time.set_timer(enemy_timer, spawn_speed)
+                #    enemy_surface = current_enemy_type[enemy_animation]
                 # i should change background and character surfaces here
                 speed += 1.5
 
@@ -363,14 +402,14 @@ while True:
                         spawn_speed = 1400
                         pygame.time.set_timer(enemy_timer, spawn_speed)
                         pygame.time.set_timer(stage_timer, 20000)
-                        current_enemy_type = bird_surfaces
+                        Enemy.current_type = Enemy.bird_surfaces
                         stage = 0
                         background = bird_background
                         background_rect.left = 0
 
 
                         # character position updates, could modularize
-                        enemy_rects = []
+                        enemy_group.empty()
                         player_object.reset()
 
 
@@ -400,14 +439,14 @@ while True:
                         spawn_speed = 1400
                         pygame.time.set_timer(enemy_timer, spawn_speed)
                         pygame.time.set_timer(stage_timer, 20000)
-                        current_enemy_type = bird_surfaces
+                        Enemy.current_type = Enemy.bird_surfaces
                         stage = 0
                         background = bird_background
                         background_rect.left = 0
 
 
                         # reset positions, can modularize, i guess i won't even need to reset in the future though, clear enemies list ig
-                        enemy_rects = []
+                        enemy_group.empty()
                         player_object.reset()
 
 
@@ -445,13 +484,13 @@ while True:
 
 
         # moves enemies and saves their new rects for the next iteration
-        enemy_rects = move_enemies(enemy_rects)
+        enemy_group.update()
 
 
+        
         # checks if player hit an enemy and if so ends the game
-        for enemy in enemy_rects:
-            if player_object.player_collide_rect.colliderect(enemy):
-                game = False
+        if pygame.sprite.spritecollide(player_object, enemy_group, False):
+            game = False
 
 
     ############## START / RESTART SCREENS #####################
