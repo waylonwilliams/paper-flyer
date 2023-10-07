@@ -2,7 +2,10 @@
 
 # intro animation
 # high scoresf
+
 # clean background and enemy design transition will be tough, i can do that functionality while waiting for new designs
+# group of backgrounds, get rid of old when new reaches left = 0, so start them off at left = 1000, some time in the beginning for animation
+
 # if __name__ == "__main__":
 #   everything that i currently have outside of a fxn
 # enemy size consistency / increasing across stages
@@ -41,13 +44,17 @@ class Player(pygame.sprite.Sprite):
 
         # initializes actual player
         self.image = Player.player_surfaces[self.player_animation] # image is the current surface of the sprite
-        self.rect = self.image.get_rect(midleft = (10, 300)) # rect is the rect which image will be displayed on
+        self.rect = self.image.get_rect(center = (501, 300)) # rect is the rect which image will be displayed on
         self.player_collide_rect = self.rect.copy()
         self.player_collide_rect.update(self.rect.left, self.rect.top + 10, self.rect.width - 30, self.rect.height - 20) # i use this rect for checking if player has collided, otherwise the player box is too large
 
     def move_player(self):
         # just puts player to screen if its not moving
-        if self.player_moving != 0:
+        if self.rect.left != 15:
+            self.rect.left -= 5
+            print(self.rect.left)
+
+        elif self.player_moving != 0:
 
             # if up
             if self.player_moving == 1:
@@ -80,8 +87,16 @@ class Player(pygame.sprite.Sprite):
 
     def reset(self):
         # resets all player values when start or restart button is pressed
-        self.rect.midleft = (10, 300)
-        self.player_collide_rect.midleft = (10, 300)
+        self.rect.midleft = (15, 300)
+        self.player_collide_rect.midleft = (15, 300)
+        self.image = Player.player_surfaces[self.player_animation]
+        if self.player_moving != 0:
+            self.player_moving = 0
+            self.player_collide_rect.update(self.player_collide_rect.left, self.player_collide_rect.top - 5, self.player_collide_rect.width + 15, self.player_collide_rect.height + 10)
+
+    def start_reset(self):
+        self.rect.center = (501, 300)
+        self.player_collide_rect.midleft = (15, 300)
         self.image = Player.player_surfaces[self.player_animation]
         if self.player_moving != 0:
             self.player_moving = 0
@@ -181,11 +196,13 @@ class Background(pygame.sprite.Sprite):
     plane_background = pygame.image.load("graphics/plane_background.png").convert()
     rocket_background = pygame.image.load("graphics/rocket_background.png").convert()
     alien_background = pygame.image.load("graphics/alien_background.png").convert()
+    backgrounds = [bird_background, plane_background, rocket_background, alien_background]
 
     def __init__(self):
         super().__init__()
-        self.image = Background.bird_background
-        self.rect = self.image.get_rect(topleft = (0, 0))
+        self.image = Background.backgrounds[0]
+        self.rect = self.image.get_rect(topleft = (1000, 0))
+        self.speed = Enemy.speed - .75
 
     def stage_update(self, stage):
         if stage == 0:
@@ -202,9 +219,14 @@ class Background(pygame.sprite.Sprite):
     def update(self):
 
         screen.blit(self.image, self.rect)
-        self.rect.left -= 2
+        self.rect.left -= self.speed
+        if self.rect.left < 0 and self.rect.left > -100:
+            self.speed = 2
         if self.rect.left <= -1000:
-            self.rect.left = 0
+            if len(background_group) > 1:
+                background_group.remove(self)
+            else:
+                self.rect.left = 0
 
 
 # restart function would be nice too
@@ -234,9 +256,10 @@ def update_score():
 
 
 player_object = Player()
-background_object = Background()
+#background_object = Background()
 enemy_group = pygame.sprite.Group()
 clock = pygame.time.Clock()
+background_group = pygame.sprite.Group()
 
 # importing font
 test_font = pygame.font.Font("fonts/font1.ttf", 30)
@@ -248,8 +271,8 @@ start_time = 0 # initializing variable used to calculate how long the game has b
 speed = 8 # initial speed of enemies, increases as game goes on
 
 # start screen surfaces and rects
-man_surface = pygame.image.load("graphics/man.jpeg").convert_alpha()
-man_rect = man_surface.get_rect(center = (500, 300))
+start_instructions_surface = test_font.render("Use the vertical arrow keys to avoid the obstacles", False, "black")
+start_instructions_rect = start_instructions_surface.get_rect(center = (500, 100))
 starttxt_surface = test_font.render("Press space to start", False, "black")
 starttxt_rect = starttxt_surface.get_rect(center = (500, 500))
 
@@ -285,6 +308,16 @@ while True:
             exit() # closes the game eloquently rather than just breaking from the while loop
 
 
+        if event.type == animation_timer: # every 400 ms
+
+                player_object.animate_player()
+
+                if game:
+
+                    for spr in enemy_group:
+                        spr.animate()
+
+
         # these events should only be checked when in game mode
         if game:
 
@@ -308,17 +341,25 @@ while True:
                 Enemy.rand = randint(0, 1)
                 Enemy.create()
 
-            if event.type == animation_timer: # every 400 ms
-
-                player_object.animate_player()
-                for spr in enemy_group:
-                    spr.animate()
-
             if event.type == stage_timer:
 
-                background_object.rect.left = 0
+                # i shouldn't reset the background rect
+                if stage <= 2:
+                    new_background = Background()
+                    new_background.image = Background.backgrounds[stage + 1]
+                    print("New background = Background.backgrounds[{}]".format(stage+1))
+                    new_background.speed = Enemy.speed
+                    background_group.add(new_background)
+                    print(background_group)
+
+                #background_object.rect.left = 0
+
                 Enemy.stage_update(stage)
-                background_object.stage_update(stage)
+                # add background to group
+
+
+                #background_object.stage_update(stage)
+
                 stage += 1
 
 
@@ -342,11 +383,20 @@ while True:
                         pygame.time.set_timer(stage_timer, 25000)
                         Enemy.current_type = Enemy.bird_surfaces
                         stage = 0
-                        background_object.reset()
+                        # empty background group, or just have bird background inside of it
+                        background_group.empty()
+                        background_group.add(Background())
+                        print("starting", background_group)
+                        print(Enemy.speed)
+
+
+                        #background_object.reset()
+
 
 
                         # character position updates, could modularize
                         enemy_group.empty()
+                        Enemy.speed = 8
                         player_object.reset()
 
 
@@ -378,12 +428,20 @@ while True:
                         pygame.time.set_timer(stage_timer, 25000)
                         Enemy.current_type = Enemy.bird_surfaces
                         stage = 0
-                        background_object.reset()
+                        background_group.empty()
+                        background_group.add(Background())
+                        print("starting ", background_group)
+                        print(Enemy.speed)
+                        # empty background group, or just have bird background inside of it
+                        
+                        #background_object.reset()
+
 
 
                         # reset positions, can modularize, i guess i won't even need to reset in the future though, clear enemies list ig
                         enemy_group.empty()
-                        player_object.reset()
+                        Enemy.speed = 8
+                        player_object.start_reset()
 
 
                         # sets new start time to keep track of score
@@ -396,10 +454,17 @@ while True:
 
     if game:
 
+        screen.fill("white")
+
 
         # background
-        background_object.update()
-        # i should change the background surface when stage changes
+
+        #background_object.update()
+
+        for spr in background_group:
+            spr.update()
+        # move every item in background 
+        # remove when the new one covers whole screen?
 
 
         # updates score on screen, stores in variable so it can be displayed when game ends
@@ -437,7 +502,9 @@ while True:
 
 
             # other start screen content
-            screen.blit(man_surface, man_rect)
+            player_object.rect.center = (501, 300)
+            screen.blit(player_object.image, player_object.rect)
+            screen.blit(start_instructions_surface, start_instructions_rect)
             screen.blit(starttxt_surface, starttxt_rect)
 
 
