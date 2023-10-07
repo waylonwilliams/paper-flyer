@@ -1,11 +1,6 @@
 # https://www.youtube.com/watch?v=AY9MnQ4x3zk
 
-# intro animation
 # high scoresf
-
-# clean background and enemy design transition will be tough, i can do that functionality while waiting for new designs
-# group of backgrounds, get rid of old when new reaches left = 0, so start them off at left = 1000, some time in the beginning for animation
-
 # if __name__ == "__main__":
 #   everything that i currently have outside of a fxn
 # enemy size consistency / increasing across stages
