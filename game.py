@@ -5,6 +5,7 @@
 # clean background and enemy design transition will be tough, i can do that functionality while waiting for new designs
 # if __name__ == "__main__":
 #   everything that i currently have outside of a fxn
+# enemy size consistency / increasing across stages
 
 
 import pygame
@@ -94,6 +95,9 @@ class Enemy(pygame.sprite.Sprite):
     bird_surfaces = [bird_1, bird_2]
 
     #planes
+    plane_1 = pygame.image.load("graphics/temp_plane.png").convert_alpha()
+    plane_2 = plane_1
+    plane_surfaces = [plane_1, plane_2]
 
     # rockets
     rocket_1 = pygame.image.load("graphics/rocket1.PNG").convert_alpha()
@@ -143,8 +147,10 @@ class Enemy(pygame.sprite.Sprite):
     def stage_update(stage):
 
         if stage == 0:
-            Enemy.current_type = Enemy.rocket_surfaces
+            Enemy.current_type = Enemy.plane_surfaces
         elif stage == 1:        
+            Enemy.current_type = Enemy.rocket_surfaces
+        elif stage == 2:
             Enemy.current_type = Enemy.alien_surfaces
         # add more types
 
@@ -171,10 +177,10 @@ class Enemy(pygame.sprite.Sprite):
 
 
 class Background(pygame.sprite.Sprite):
-    bird_background = pygame.image.load("graphics/Planner-3.jpg").convert()
-    plane_background = pygame.image.load("graphics/plane_background.jpg").convert()
-    rocket_background = pygame.image.load("graphics/rocket_background.jpg").convert()
-    alien_background = pygame.image.load("graphics/alien_backgrond.png").convert()
+    bird_background = pygame.image.load("graphics/bird_background.png").convert()
+    plane_background = pygame.image.load("graphics/plane_background.png").convert()
+    rocket_background = pygame.image.load("graphics/rocket_background.png").convert()
+    alien_background = pygame.image.load("graphics/alien_background.png").convert()
 
     def __init__(self):
         super().__init__()
@@ -333,7 +339,7 @@ while True:
                         speed = 8
                         spawn_speed = 1400
                         pygame.time.set_timer(enemy_timer, spawn_speed)
-                        pygame.time.set_timer(stage_timer, 20000)
+                        pygame.time.set_timer(stage_timer, 25000)
                         Enemy.current_type = Enemy.bird_surfaces
                         stage = 0
                         background_object.reset()
@@ -369,7 +375,7 @@ while True:
                         speed = 8
                         spawn_speed = 1400
                         pygame.time.set_timer(enemy_timer, spawn_speed)
-                        pygame.time.set_timer(stage_timer, 20000)
+                        pygame.time.set_timer(stage_timer, 25000)
                         Enemy.current_type = Enemy.bird_surfaces
                         stage = 0
                         background_object.reset()
