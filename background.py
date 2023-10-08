@@ -28,8 +28,6 @@ class Background(pygame.sprite.Sprite):
         self.rect.left = 0
 
     def update(self):
-
-        # after calling this blit every background
         self.rect.left -= self.speed
         if self.rect.left < 0 and self.rect.left > -100:
             self.speed = 2

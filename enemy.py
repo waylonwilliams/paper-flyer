@@ -2,22 +2,15 @@ import pygame
 from random import randint
 
 class Enemy(pygame.sprite.Sprite):
-    # birds
     bird_1 = pygame.image.load("graphics/bird2.PNG").convert_alpha()
     bird_2 = pygame.image.load("graphics/bird1.PNG").convert_alpha()
     bird_surfaces = [bird_1, bird_2]
-
-    #planes
     plane_1 = pygame.image.load("graphics/temp_plane.png").convert_alpha()
     plane_2 = plane_1
     plane_surfaces = [plane_1, plane_2]
-
-    # rockets
     rocket_1 = pygame.image.load("graphics/rocket1.PNG").convert_alpha()
     rocket_2 = pygame.image.load("graphics/rocket2.PNG").convert_alpha()
     rocket_surfaces = [rocket_1, rocket_2]
-
-    # aliens
     alien_1 = pygame.image.load("graphics/ufo1.PNG").convert_alpha()
     alien_2 = pygame.image.load("graphics/ufo2.PNG").convert_alpha()
     alien_surfaces = [alien_1, alien_2]
@@ -40,7 +33,6 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(midleft = (1200, 100))
 
     def create():
-
         new_enemy = Enemy()
         new_enemy.type = Enemy.current_type
         new_enemy.image = new_enemy.type[0]
@@ -51,30 +43,23 @@ class Enemy(pygame.sprite.Sprite):
         Enemy.prev_row = Enemy.possible_rows.pop(rand)
 
     def stage_update(stage):
-
         if stage == 0:
             Enemy.current_type = Enemy.plane_surfaces
         elif stage == 1:        
             Enemy.current_type = Enemy.rocket_surfaces
         elif stage == 2:
             Enemy.current_type = Enemy.alien_surfaces
-        # add more types
 
         if Enemy.spawn_speed > 400:
             Enemy.spawn_speed -= 200
-            # do this in loop as well
-            #pygame.time.set_timer(enemy_timer, Enemy.spawn_speed)
         Enemy.speed += 2
 
     def update(self):
-
         self.rect.left -= Enemy.speed
         if self.rect.left < -200:
             Enemy.enemy_group.remove(self)
-        # post all enemies to screen
 
     def animate(self):
-
         if self.animation == 0:
             self.image = self.type[self.animation]
             self.animation = 1
