@@ -1,56 +1,31 @@
-# https://www.youtube.com/watch?v=AY9MnQ4x3zk
-
-# high scoresf
-# if __name__ == "__main__":
-#   everything that i currently have outside of a fxn
-# enemy size consistency / increasing across stages
-
-
 import pygame
 from sys import exit
 from random import randint
 
-# initializing pygame stuff
+# pygame config
 pygame.init()
-
-# creates the base display
 screen = pygame.display.set_mode((1000, 600))
 screen_rect = screen.get_rect(topleft = (0, 0))
 pygame.display.set_caption("")
 
+# display must be initialized first for these imports to work
 from player import *
 from enemy import *
 from background import *
 
-
 # restart function would be nice too
-
 
 def update_score():
     """
-    function that increments the score by 1 every second
+    calculates score based on time passed in the game and puts it to the screen
     """
-
-
-    # calculate score
     score_ms = pygame.time.get_ticks() - start_time
-
-
-    # update score on screen
     score_surface = test_font.render("Score: " + str(score_ms // 1000), False, "black")
     score_rect = score_surface.get_rect(center = (500, 30))
     screen.blit(score_surface, score_rect)
-
-
-    # return score so it saves across fromes
     return score_ms
 
-
-############################ PYGAME SETUP #############################
-
-
-player_object = Player()
-#background_object = Background()
+Player.player_group.add(Player())
 clock = pygame.time.Clock()
 
 # importing font
@@ -102,7 +77,7 @@ while True:
 
         if event.type == animation_timer: # every 400 ms
 
-                player_object.animate_player()
+                Player.player_group.sprite.animate_player()
 
                 if game:
 
@@ -116,17 +91,7 @@ while True:
 
             if event.type == pygame.KEYDOWN: # if key is pressed
 
-                if event.key == pygame.K_UP: # up arrow key
-                    if player_object.rect.centery != 100: # can't move up if at the top
-                        if player_object.player_moving == 0: # not currently moving
-                            player_object.player_moving = 1 # player moving state is now up
-                            player_object.player_collide_rect.update(player_object.player_collide_rect.left, player_object.player_collide_rect.top + 5, player_object.player_collide_rect.width - 15, player_object.player_collide_rect.height - 10)
-
-                if event.key == pygame.K_DOWN: # down arrow key
-                    if player_object.rect.centery !=  500: # can't move down if at the bottom
-                        if player_object.player_moving == 0: # not currently moving
-                            player_object.player_moving = 2 # player moving state is now down
-                            player_object.player_collide_rect.update(player_object.player_collide_rect.left, player_object.player_collide_rect.top + 5, player_object.player_collide_rect.width - 15, player_object.player_collide_rect.height - 10)
+                Player.player_group.sprite.key_pressed(event.key)
 
             if event.type == enemy_timer: # spawns new enemy
 
@@ -179,7 +144,7 @@ while True:
                         # character position updates, could modularize
                         Enemy.enemy_group.empty()
                         Enemy.speed = 8
-                        player_object.reset()
+                        Player.player_group.sprite.reset()
                         Background.background_group.empty()
                         Background.background_group.add(Background(Enemy.speed))
 
@@ -221,7 +186,7 @@ while True:
                         # reset positions, can modularize, i guess i won't even need to reset in the future though, clear enemies list ig
                         Enemy.enemy_group.empty()
                         Enemy.speed = 8
-                        player_object.start_reset()
+                        Player.player_group.sprite.start_reset()
                         Background.background_group.empty()
                         Background.background_group.add(Background(Enemy.speed))
 
@@ -245,7 +210,7 @@ while True:
 
         for spr in Background.background_group:
             spr.update()
-            screen.blit(spr.image, spr.rect)
+        Background.background_group.draw(screen)
         # move every item in background 
         # remove when the new one covers whole screen?
 
@@ -255,8 +220,8 @@ while True:
 
 
         # updates player location
-        player_object.move_player()
-        screen.blit(player_object.image, player_object.rect)
+        Player.player_group.sprite.move_player()
+        Player.player_group.draw(screen)
 
         # moves enemies and saves their new rects for the next iteration
         Enemy.enemy_group.update()
@@ -264,9 +229,9 @@ while True:
 
         
         # checks if player hit an enemy and if so ends the game
+        Enemy.enemy_group.draw(screen)
         for spr in Enemy.enemy_group:
-            screen.blit(spr.image, spr.rect)
-            if spr.rect.colliderect(player_object.player_collide_rect):
+            if spr.rect.colliderect(Player.player_group.sprite.player_collide_rect):
                 game = False
                 break
 
@@ -287,8 +252,8 @@ while True:
 
 
             # other start screen content
-            player_object.rect.center = (501, 300)
-            screen.blit(player_object.image, player_object.rect)
+            Player.player_group.sprite.rect.center = (501, 300)
+            Player.player_group.draw(screen)
             screen.blit(start_instructions_surface, start_instructions_rect)
             screen.blit(starttxt_surface, starttxt_rect)
 

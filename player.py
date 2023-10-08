@@ -12,6 +12,8 @@ class Player(pygame.sprite.Sprite):
     # all player images, 0 and 1 are animated straight, 2 is up, 3 is down
     player_surfaces = [player_straight_1, player_straight_2, player_up, player_down]
 
+    player_group = pygame.sprite.GroupSingle()
+
     def __init__(self):
         super().__init__()
 
@@ -76,3 +78,15 @@ class Player(pygame.sprite.Sprite):
             self.player_moving = 0
             self.player_collide_rect.update(self.player_collide_rect.left, self.player_collide_rect.top - 5, self.player_collide_rect.width + 15, self.player_collide_rect.height + 10)
 
+    def key_pressed(self, event):
+        if event == pygame.K_UP: # up arrow key
+            if self.rect.centery != 100: # can't move up if at the top
+                if self.player_moving == 0: # not currently moving
+                    self.player_moving = 1 # player moving state is now up
+                    self.player_collide_rect.update(self.player_collide_rect.left, self.player_collide_rect.top + 5, self.player_collide_rect.width - 15, self.player_collide_rect.height - 10)
+
+        if event == pygame.K_DOWN: # down arrow key
+            if self.rect.centery !=  500: # can't move down if at the bottom
+                if self.player_moving == 0: # not currently moving
+                    self.player_moving = 2 # player moving state is now down
+                    self.player_collide_rect.update(self.player_collide_rect.left, self.player_collide_rect.top + 5, self.player_collide_rect.width - 15, self.player_collide_rect.height - 10)
