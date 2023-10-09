@@ -7,6 +7,8 @@ class Player(pygame.sprite.Sprite):
     player_down = pygame.image.load("graphics/plane2down.PNG").convert_alpha()
     player_surfaces = [player_straight_1, player_straight_2, player_up, player_down]
 
+    move_sound = pygame.mixer.Sound("audio/flyingsfx.wav")
+
     player_group = pygame.sprite.GroupSingle()
 
     def __init__(self):
@@ -69,9 +71,13 @@ class Player(pygame.sprite.Sprite):
                 if self.player_moving == 0: # not currently moving
                     self.player_moving = 1 # player moving state is now up
                     self.player_collide_rect.update(self.player_collide_rect.left, self.player_collide_rect.top + 5, self.player_collide_rect.width - 15, self.player_collide_rect.height - 10)
+                    Player.move_sound.play()
+                    Player.move_sound.fadeout(750)
 
         if event == pygame.K_DOWN: # down arrow key
             if self.rect.centery !=  500: # can't move down if at the bottom
                 if self.player_moving == 0: # not currently moving
                     self.player_moving = 2 # player moving state is now down
                     self.player_collide_rect.update(self.player_collide_rect.left, self.player_collide_rect.top + 5, self.player_collide_rect.width - 15, self.player_collide_rect.height - 10)
+                    Player.move_sound.play()
+                    Player.move_sound.fadeout(750)

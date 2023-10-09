@@ -13,6 +13,8 @@ from player import *
 from enemy import *
 from background import *
 
+pygame.display.set_icon(Player.player_surfaces[2])
+
 # restart function would be nice too
 
 def update_score():
@@ -46,6 +48,13 @@ restart_surface = font.render("Restart?", False, "black")
 restart_rect = restart_surface.get_rect(midtop = (500, 350))
 home_surface = font.render("Start Screen", False, "black")
 home_rect = home_surface.get_rect(midtop = (500, 450))
+
+# loose sfx
+crumble = pygame.mixer.Sound("audio/papersfx.wav")
+game_music = pygame.mixer.Sound("audio/spacemusic.wav")
+game_music.set_volume(.2)
+start_music = pygame.mixer.Sound("audio/title.wav")
+start_music.set_volume(.2)
 
 # event timers
 enemy_timer = pygame.USEREVENT + 1 # enemy spawn event
@@ -101,6 +110,8 @@ while True:
                         Player.player_group.sprite.start_reset()
                         Background.background_group.empty()
                         Background.background_group.add(Background(Enemy.speed))
+                        start_music.fadeout(1000)
+                        game_music.play(fade_ms=2700)
                         start_time = pygame.time.get_ticks()
             
             else: # restart screen
@@ -120,6 +131,8 @@ while True:
                         Player.player_group.sprite.reset()
                         Background.background_group.empty()
                         Background.background_group.add(Background(Enemy.speed))
+                        start_music.fadeout(1000)
+                        game_music.play(fade_ms=2700)
                         start_time = pygame.time.get_ticks()
 
                     elif home_rect.collidepoint(event.pos): # redirect to start screen
@@ -143,6 +156,9 @@ while True:
         for spr in Enemy.enemy_group:
             if spr.rect.colliderect(Player.player_group.sprite.player_collide_rect):
                 game = False
+                game_music.fadeout(1000)
+                crumble.play()
+                crumble.fadeout(1000)
                 break
 
     else:
@@ -155,6 +171,10 @@ while True:
             screen.blit(start_instructions_surface, start_instructions_rect)
             screen.blit(starttxt_surface, starttxt_rect)
 
+            if start_music.get_num_channels() == 0:
+                start_music.play(fade_ms=2300, loops=-1)
+
+
         else:
             screen.fill("white") 
 
@@ -166,6 +186,9 @@ while True:
             screen.blit(restart_surface, restart_rect)
             pygame.draw.rect(screen, "grey", home_rect)
             screen.blit(home_surface, home_rect)
+
+            if start_music.get_num_channels() == 0:
+                start_music.play(fade_ms=2300, loops=-1)
 
     pygame.display.update()
     clock.tick(60) # sets max frame rate   
