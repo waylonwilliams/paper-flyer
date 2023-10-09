@@ -1,9 +1,11 @@
 # Paper Flyer
 
-work in progress
+Demo
 
-to play the current version:
+https://github.com/waylonwilliams/paper-flyer/assets/145303505/c8d395d8-3d90-4e45-9334-7a7e67aeff65
 
-clone or download this repository
+To play yourself:
 
-run `python3 game.py`
+  Download or clone this repository
+
+  Run `python3 game.py`
