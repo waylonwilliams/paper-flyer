@@ -54,7 +54,7 @@ crumble = pygame.mixer.Sound("audio/papersfx.wav")
 game_music = pygame.mixer.Sound("audio/spacemusic.wav")
 game_music.set_volume(.2)
 start_music = pygame.mixer.Sound("audio/title.wav")
-start_music.set_volume(.2)
+start_music.set_volume(.5)
 
 # event timers
 enemy_timer = pygame.USEREVENT + 1 # enemy spawn event
@@ -172,7 +172,7 @@ while True:
             screen.blit(starttxt_surface, starttxt_rect)
 
             if start_music.get_num_channels() == 0:
-                start_music.play(fade_ms=2300, loops=-1)
+                start_music.play(fade_ms=3500, loops=-1)
 
 
         else:
@@ -188,7 +188,7 @@ while True:
             screen.blit(home_surface, home_rect)
 
             if start_music.get_num_channels() == 0:
-                start_music.play(fade_ms=2300, loops=-1)
+                start_music.play(fade_ms=3500, loops=-1)
 
     pygame.display.update()
     clock.tick(60) # sets max frame rate   
