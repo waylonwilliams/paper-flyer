@@ -6,8 +6,8 @@ https://github.com/waylonwilliams/paper-flyer/assets/145303505/c8d395d8-3d90-4e4
 
 To play yourself:
 
->Download or clone this repository
+    Download or clone this repository
 
->Ensure you have pygame installed with `pip install pygame`
+    Ensure you have pygame installed with `pip install pygame`
 
->Run `python3 game.py`
+    Run `python3 game.py`
