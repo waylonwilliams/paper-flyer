@@ -130,7 +130,9 @@ while True:
                         Enemy.speed = 8
                         Player.player_group.sprite.reset()
                         Background.background_group.empty()
-                        Background.background_group.add(Background(Enemy.speed))
+                        new_background = Background(Enemy.speed)
+                        new_background.rect.topleft = (0, 0)
+                        Background.background_group.add(new_background)
                         start_music.fadeout(1000)
                         game_music.play(fade_ms=2700)
                         start_time = pygame.time.get_ticks()
