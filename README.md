@@ -8,4 +8,6 @@ To play yourself:
 
   Download or clone this repository
 
+  Ensure you have pygame installed with `pip install pygame`
+
   Run `python3 game.py`
